@@ -1,12 +1,1104 @@
-HTML
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="h-full">
 <head>
-  <meta charset="UTF-8">
-  <title>Mon premier site</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Santa — Tirage au Sort</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Fraunces', 'Georgia', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        festive: {
+                            cream: '#FCF9F2',
+                            bordeaux: '#881337',
+                            crimson: '#BE123C',
+                            pine: '#064E3B',
+                            gold: '#D97706',
+                            goldLight: '#FDE68A'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Fraunces & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        h1, h2, .font-festive {
+            font-family: 'Fraunces', Georgia, serif;
+        }
+        @keyframes popScale {
+            0% { opacity: 0; transform: scale(0.92) translateY(12px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes floatGift {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes dropSanta {
+            0% { transform: translate(-50%, -150px) scale(0.8); opacity: 0; }
+            15% { transform: translate(-50%, 25vh) scale(1.5) rotate(-10deg); opacity: 1; }
+            30% { transform: translate(-50%, 25vh) scale(1.5) rotate(10deg); opacity: 1; }
+            45% { transform: translate(-50%, 25vh) scale(1.5) rotate(-10deg); opacity: 1; }
+            60% { transform: translate(-50%, 25vh) scale(1.5) rotate(0deg); opacity: 1; }
+            100% { transform: translate(-50%, 150vh) scale(1.5); opacity: 0; }
+        }
+        .animate-santa-drop {
+            animation: dropSanta 4s ease-in-out forwards;
+            position: fixed;
+            left: 50%;
+            top: 0;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .animate-pop {
+            animation: popScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-gift {
+            animation: floatGift 3s ease-in-out infinite;
+        }
+        .card-shimmer {
+            background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.4) 50%, transparent 75%);
+            background-size: 200% 100%;
+            animation: shimmer 3.5s infinite linear;
+        }
+        .bg-festive-gradient {
+            background: linear-gradient(135deg, #FCF9F2 0%, #FEE2E2 100%);
+        }
+        .dark .bg-festive-gradient {
+            background: linear-gradient(135deg, #020617 0%, #4C0519 100%);
+        }
+    </style>
 </head>
-<body>
-  <h1>Bienvenue sur mon site web !</h1>
-  <p>Ceci est ma première page hébergée sur GitHub Pages.</p>
+<body class="min-h-full bg-festive-gradient text-slate-900 dark:text-slate-100 transition-colors duration-300 flex flex-col justify-between selection:bg-rose-200 selection:text-rose-900">
+
+    <!-- Animation de Démarrage -->
+    <div class="text-7xl sm:text-8xl animate-santa-drop drop-shadow-2xl" aria-hidden="true">
+        🎅
+    </div>
+
+    <!-- Top Header -->
+    <header class="sticky top-0 z-30 w-full bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-amber-200/70 dark:border-slate-800 px-4 sm:px-6 py-3.5">
+        <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
+            <!-- Brand -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-rose-800 to-rose-600 flex items-center justify-center text-amber-100 shadow-md shadow-rose-900/20 shrink-0">
+                    <!-- Gift SVG -->
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                        <rect x="2" y="7" width="20" height="5"></rect>
+                        <line x1="12" y1="22" x2="12" y2="7"></line>
+                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <h1 class="text-lg sm:text-xl font-bold text-rose-950 dark:text-amber-50 leading-tight">Secret Santa</h1>
+                        <!-- Snowflake SVG -->
+                        <svg class="w-4 h-4 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <line x1="12" y1="2" x2="12" y2="22"></line>
+                            <path d="m20 16-4-4 4-4"></path>
+                            <path d="m4 8 4 4-4 4"></path>
+                            <path d="m16 4-4 4-4-4"></path>
+                            <path d="m8 20 4-4 4 4"></path>
+                        </svg>
+                    </div>
+                    <p id="header-subtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium">Mode Organisateur • 9 participants</p>
+                </div>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="flex items-center space-x-2">
+                <!-- Progress Pill (Visible in Participant Mode) -->
+                <div id="header-progress-pill" class="hidden items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-900/10 dark:bg-emerald-500/15 border border-emerald-700/20 dark:border-emerald-400/30 text-emerald-900 dark:text-emerald-300 text-xs font-bold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse"></span>
+                    <span id="header-progress-text">0 / 9 tirages effectués</span>
+                </div>
+
+                <!-- Return to Organiser Mode (Visible in Participant Mode) -->
+                <button id="btn-back-organiser" onclick="confirmReturnToOrganiser()" class="hidden items-center space-x-1.5 px-3 py-2 rounded-xl bg-amber-100/80 dark:bg-slate-800 hover:bg-amber-200/80 dark:hover:bg-slate-700 text-amber-950 dark:text-amber-200 text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Mode Organisateur</span>
+                </button>
+
+                <!-- Dark / Light Mode Toggle -->
+                <button onclick="toggleTheme()" aria-label="Changer le thème clair/sombre" class="p-2.5 rounded-xl bg-amber-100/70 dark:bg-slate-800 hover:bg-amber-200/70 dark:hover:bg-slate-700 text-amber-900 dark:text-amber-300 transition">
+                    <!-- Moon -->
+                    <svg class="w-4 h-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                    </svg>
+                    <!-- Sun -->
+                    <svg class="w-4 h-4 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2"></path><path d="M12 20v2"></path>
+                        <path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path>
+                        <path d="M2 12h2"></path><path d="M20 12h2"></path>
+                        <path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow flex flex-col justify-center">
+
+        <!-- ========================================================= -->
+        <!-- VIEW 1: INTERFACE ORGANISATEUR (CONFIGURATION)            -->
+        <!-- ========================================================= -->
+        <section id="view-organiser" class="space-y-6 animate-pop">
+            <div class="text-center space-y-2 max-w-xl mx-auto">
+                <span class="inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full bg-rose-900/10 dark:bg-rose-500/15 text-rose-900 dark:text-rose-300 text-xs font-bold tracking-wide uppercase">
+                    <span>Étape 1 • Préparation</span>
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-rose-950 dark:text-white tracking-tight">
+                    Configurez votre tirage au sort
+                </h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">
+                    Saisissez les prénoms des participants, ajoutez d'éventuelles exclusions, puis passez l'appareil à chacun pour qu'il clique simplement sur son nom.
+                </p>
+            </div>
+
+            <!-- Card: Participants List -->
+            <div class="bg-white dark:bg-slate-900 border border-amber-200/80 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-900/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 flex items-center justify-center">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white">
+                                Liste des participants (<span id="count-participants">9</span>)
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Chaque personne tirera exactement 1 autre personne.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="prefillNineParticipants()" class="px-3.5 py-2 rounded-xl bg-amber-100/80 dark:bg-amber-950/60 hover:bg-amber-200/80 dark:hover:bg-amber-900/60 text-amber-950 dark:text-amber-300 text-xs font-bold transition flex items-center space-x-1.5">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+                            </svg>
+                            <span>Réinitialiser la liste initiale</span>
+                        </button>
+                        <button type="button" onclick="addParticipant()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center space-x-1.5">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Ajouter</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3-Column Responsive Grid of Inputs -->
+                <div id="participants-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <!-- Inputs injected by JS -->
+                </div>
+            </div>
+
+            <!-- Collapsible Card: Exclusions (Optional) -->
+            <div class="bg-white dark:bg-slate-900 border border-amber-200/80 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
+                <button type="button" onclick="toggleExclusionsPanel()" class="w-full p-5 sm:px-7 flex items-center justify-between text-left hover:bg-amber-50/40 dark:hover:bg-slate-800/40 transition">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-rose-900/10 dark:bg-rose-500/15 text-rose-800 dark:text-rose-300 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h3 class="font-bold text-base text-slate-900 dark:text-white">Exclusions (optionnel)</h3>
+                                <span id="exclusions-badge" class="hidden px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 text-xs font-bold">0</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Empêcher deux personnes (ex : conjoints) de se tirer mutuellement.</p>
+                        </div>
+                    </div>
+                    <svg id="exclusions-chevron" class="w-5 h-5 text-slate-400 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+
+                <div id="exclusions-panel" class="hidden px-5 sm:px-7 pb-6 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 bg-amber-50/70 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-amber-200/70 dark:border-slate-700">
+                        <select id="exclusion-person-a" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-rose-600"></select>
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 text-center px-1">↔ ne tire pas ↔</span>
+                        <select id="exclusion-person-b" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-rose-600"></select>
+                        <button type="button" onclick="addMutualExclusion()" class="px-4 py-2.5 rounded-xl bg-rose-800 hover:bg-rose-900 text-white text-xs font-bold transition shrink-0">
+                            + Ajouter la paire
+                        </button>
+                    </div>
+
+                    <div id="exclusions-list" class="space-y-2">
+                        <!-- Mutual exclusion pairs rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Primary CTA Button -->
+            <div class="pt-2 flex flex-col items-center space-y-2">
+                <button type="button" id="btn-launch-draw" onclick="validateAndStartDraw()" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-rose-900 via-rose-800 to-rose-700 hover:from-rose-950 hover:to-rose-800 text-white font-bold text-base sm:text-lg shadow-xl shadow-rose-900/25 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-3">
+                    <svg class="w-5 h-5 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                        <rect x="2" y="7" width="20" height="5"></rect>
+                        <line x1="12" y1="22" x2="12" y2="7"></line>
+                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                    </svg>
+                    <span id="launch-btn-label">Valider les participants & Lancer le tirage</span>
+                </button>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Garantie 100 % : chacun offre 1 cadeau et reçoit 1 cadeau, sans auto-attribution.
+                </p>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 2: INTERFACE PARTICIPANTS (GRILLE DES PRÉNOMS)       -->
+        <!-- ========================================================= -->
+        <section id="view-participants" class="hidden space-y-6 animate-pop">
+            <div class="text-center space-y-2 max-w-xl mx-auto">
+                <span class="inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full bg-emerald-900/10 dark:bg-emerald-500/15 text-emerald-900 dark:text-emerald-300 text-xs font-bold tracking-wide uppercase">
+                    <span>Tirage en cours</span>
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-rose-950 dark:text-white tracking-tight">
+                    Clique sur ton prénom 🎄
+                </h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">
+                    Faites passer l'appareil autour de la table. Chaque participant appuie uniquement sur sa propre carte pour découvrir son destinataire en secret.
+                </p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="max-w-md mx-auto w-full bg-amber-200/60 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div id="participants-progress-bar" class="bg-gradient-to-r from-emerald-700 to-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+
+            <!-- 9 Large Tactile Cards Grid -->
+            <div id="participant-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2">
+                <!-- Cards rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 3: ÉCRAN DE FIN (9 / 9 TIRAGES EFFECTUÉS)            -->
+        <!-- ========================================================= -->
+        <section id="view-finished" class="hidden space-y-6 animate-pop">
+            <div class="bg-white dark:bg-slate-900 border-2 border-amber-300/80 dark:border-amber-700/50 rounded-3xl p-7 sm:p-10 shadow-xl text-center space-y-6 max-w-2xl mx-auto relative overflow-hidden">
+                <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-rose-800 via-amber-400 to-emerald-700"></div>
+
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-800 to-emerald-600 text-amber-100 mx-auto flex items-center justify-center shadow-lg shadow-emerald-900/20 animate-gift">
+                    <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                        <rect x="2" y="7" width="20" height="5"></rect>
+                        <line x1="12" y1="22" x2="12" y2="7"></line>
+                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                    </svg>
+                </div>
+
+                <div class="space-y-2">
+                    <span class="inline-block px-3.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
+                        Mission accomplie • <span id="finished-count-badge">Terminé</span>
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-rose-950 dark:text-white tracking-tight">
+                        Tous les Secret Santa ont été attribués ! Joyeuses fêtes ! ✨
+                    </h2>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+                        Chacun connaît désormais la personne qu'il va gâter. Gardez bien le secret jusqu'au jour J !
+                    </p>
+                </div>
+
+                <!-- Completed Participants Pills -->
+                <div id="finished-pills" class="flex flex-wrap justify-center gap-2 py-2"></div>
+
+                <!-- Actions -->
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <button type="button" onclick="confirmNewDraw()" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-rose-800 hover:bg-rose-900 text-white text-sm font-bold shadow-md transition flex items-center justify-center space-x-2">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                            <path d="M3 3v5h5"></path>
+                        </svg>
+                        <span>Nouveau tirage</span>
+                    </button>
+
+                    <button type="button" id="btn-show-recap" onclick="confirmOrganiserRecap()" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-amber-100/80 dark:bg-slate-800 hover:bg-amber-200/80 dark:hover:bg-slate-700 text-amber-950 dark:text-amber-200 text-sm font-bold transition flex items-center justify-center space-x-2">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <span>Voir le récapitulatif (Organisateur)</span>
+                    </button>
+                </div>
+
+                <!-- Organiser Secret Recap Box -->
+                <div id="organiser-recap-box" class="hidden text-left bg-festive-cream dark:bg-slate-800/80 rounded-2xl p-5 border border-amber-300/70 dark:border-slate-700 space-y-3 animate-pop">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-sm text-rose-900 dark:text-rose-300">Récapitulatif complet des attributions</h3>
+                        <button type="button" onclick="hideOrganiserRecap()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-white underline">
+                            Masquer
+                        </button>
+                    </div>
+                    <div id="organiser-recap-list" class="divide-y divide-amber-200/60 dark:divide-slate-700 text-sm"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================================= -->
+    <!-- FULLSCREEN OVERLAY MODAL: STEP A & STEP B REVEAL          -->
+    <!-- ========================================================= -->
+    <div id="reveal-overlay" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border-2 border-amber-300/90 dark:border-amber-700/60 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center relative overflow-hidden animate-pop">
+            <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-rose-800 via-amber-400 to-emerald-700"></div>
+
+            <!-- ÉTAPE A : Confirmation Anti-erreur & Confidentialité -->
+            <div id="modal-step-confirm" class="space-y-6">
+                <div class="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 mx-auto flex items-center justify-center">
+                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </div>
+
+                <div class="space-y-2">
+                    <span class="text-xs font-bold uppercase tracking-widest text-rose-700 dark:text-rose-400">Vérification d'identité</span>
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-snug">
+                        Tu as sélectionné <span id="modal-selected-name" class="text-rose-800 dark:text-rose-400 underline decoration-amber-400 decoration-2 underline-offset-4">Prénom</span>.
+                    </h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 pt-1">
+                        Assure-toi que personne ne regarde l'écran !
+                    </p>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <button type="button" onclick="revealRecipientNow()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-rose-800 to-rose-700 hover:from-rose-900 hover:to-rose-800 text-white font-bold text-base sm:text-lg shadow-lg shadow-rose-900/25 transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-2">
+                        <span>Révéler mon Secret Santa 🎁</span>
+                    </button>
+
+                    <button type="button" onclick="closeRevealOverlayWithoutSaving()" class="w-full py-2.5 text-sm font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition">
+                        ← Retour (ce n'est pas moi)
+                    </button>
+                </div>
+            </div>
+
+            <!-- ÉTAPE B : Révélation Festive -->
+            <div id="modal-step-result" class="hidden space-y-6 animate-pop">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-rose-800 to-rose-600 text-amber-100 mx-auto flex items-center justify-center shadow-lg shadow-rose-900/25 animate-gift">
+                    <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                        <rect x="2" y="7" width="20" height="5"></rect>
+                        <line x1="12" y1="22" x2="12" y2="7"></line>
+                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                    </svg>
+                </div>
+
+                <div class="space-y-1">
+                    <p class="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                        Secret Santa de <span id="modal-result-giver">Prénom</span>
+                    </p>
+                    <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200">
+                        Tu dois offrir un cadeau à :
+                    </h3>
+                </div>
+
+                <!-- Animated Gift Target Card -->
+                <div class="relative py-6 px-4 rounded-2xl bg-gradient-to-br from-emerald-900 to-emerald-800 border-2 border-amber-300/80 shadow-inner overflow-hidden">
+                    <div class="card-shimmer absolute inset-0 pointer-events-none"></div>
+                    <p id="modal-result-recipient" class="font-festive text-3xl sm:text-4xl font-extrabold text-amber-100 tracking-tight relative z-10">
+                        Destinataire
+                    </p>
+                </div>
+
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Mémorise bien ce prénom, il va être verrouillé dès que tu fermeras cette fenêtre !
+                </p>
+
+                <button type="button" onclick="confirmAndLockParticipant()" class="w-full py-4 px-6 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-base sm:text-lg shadow-lg shadow-emerald-900/25 transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>C'est noté ! Masquer et fermer</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- SECURITY / CONFIRMATION MODAL (No native alert/confirm)   -->
+    <!-- ========================================================= -->
+    <div id="security-modal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-5 animate-pop">
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 mx-auto flex items-center justify-center">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <div class="space-y-1.5">
+                <h3 id="sec-modal-title" class="text-lg font-bold text-slate-900 dark:text-white">Confirmation</h3>
+                <p id="sec-modal-desc" class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Message</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button type="button" onclick="closeSecurityModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-semibold transition">
+                    Annuler
+                </button>
+                <button type="button" id="sec-modal-confirm" class="flex-1 py-2.5 rounded-xl bg-rose-800 hover:bg-rose-900 text-white text-sm font-bold transition">
+                    Confirmer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 left-5 sm:left-auto z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-xl text-sm font-semibold flex items-center space-x-2.5 max-w-md ml-auto">
+        <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+        <span id="toast-text">Notification</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full py-4 text-center text-xs text-slate-500 dark:text-slate-500 border-t border-amber-200/50 dark:border-slate-800/80">
+        Secret Santa • Tirage au sort 100 % confidentiel
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        // Updated storage key so old default names don't conflict with your new ones
+        const STORAGE_KEY = 'secret_santa_9_app_v3'; 
+        const DEFAULT_NINE = [
+            "Mayeul", "Anne", "Romain",
+            "Clémence", "Antonin", "Paul",
+            "Aurée", "Blanche", "Sixtine"
+        ];
+        const DEFAULT_EXCLUSIONS = [
+            ["Mayeul", "Anne"],
+            ["Clémence", "Antonin"],
+            ["Paul", "Aurée"]
+        ];
+
+        // Core State
+        let state = {
+            mode: 'organiser', // 'organiser' | 'participants' | 'finished'
+            participants: [...DEFAULT_NINE],
+            mutualExclusions: [...DEFAULT_EXCLUSIONS], // Array of [nameA, nameB]
+            assignments: {},      // { giver: recipient }
+            drawnGivers: [],      // Array of givers who have already revealed & closed
+            exclusionsOpen: false
+        };
+
+        let activeParticipant = null; // Currently selected participant in the modal
+
+        // Initialize on Load
+        window.onload = function() {
+            initTheme();
+            loadState();
+            renderApp();
+        };
+
+        // --- THEME MANAGEMENT ---
+        function initTheme() {
+            const saved = localStorage.getItem('secret_santa_theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('secret_santa_theme', isDark ? 'dark' : 'light');
+        }
+
+        // --- PERSISTENCE ---
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.warn("Impossible de sauvegarder dans localStorage", e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.participants) && parsed.participants.length >= 3) {
+                    state = {
+                        mode: parsed.mode || 'organiser',
+                        participants: parsed.participants,
+                        mutualExclusions: Array.isArray(parsed.mutualExclusions) ? parsed.mutualExclusions : [],
+                        assignments: parsed.assignments || {},
+                        drawnGivers: Array.isArray(parsed.drawnGivers) ? parsed.drawnGivers : [],
+                        exclusionsOpen: Boolean(parsed.exclusionsOpen)
+                    };
+                }
+            } catch (e) {
+                console.warn("Erreur lors de la lecture de localStorage", e);
+            }
+        }
+
+        // --- MAIN RENDER CONTROLLER ---
+        function renderApp() {
+            const viewOrganiser = document.getElementById('view-organiser');
+            const viewParticipants = document.getElementById('view-participants');
+            const viewFinished = document.getElementById('view-finished');
+
+            const headerSubtitle = document.getElementById('header-subtitle');
+            const progressPill = document.getElementById('header-progress-pill');
+            const btnBackOrganiser = document.getElementById('btn-back-organiser');
+
+            viewOrganiser.classList.add('hidden');
+            viewParticipants.classList.add('hidden');
+            viewFinished.classList.add('hidden');
+
+            if (state.mode === 'organiser') {
+                viewOrganiser.classList.remove('hidden');
+                headerSubtitle.innerText = `Mode Organisateur • ${state.participants.length} participants`;
+                progressPill.classList.add('hidden');
+                progressPill.classList.remove('flex');
+                btnBackOrganiser.classList.add('hidden');
+                btnBackOrganiser.classList.remove('flex');
+
+                renderOrganiserView();
+            } else if (state.mode === 'participants') {
+                viewParticipants.classList.remove('hidden');
+                headerSubtitle.innerText = `Mode Participants • Passez l'appareil`;
+                progressPill.classList.remove('hidden');
+                progressPill.classList.add('flex');
+                btnBackOrganiser.classList.remove('hidden');
+                btnBackOrganiser.classList.add('flex');
+
+                renderParticipantsView();
+            } else if (state.mode === 'finished') {
+                viewFinished.classList.remove('hidden');
+                headerSubtitle.innerText = `Tirage terminé • ${state.participants.length} / ${state.participants.length}`;
+                progressPill.classList.add('hidden');
+                progressPill.classList.remove('flex');
+                btnBackOrganiser.classList.remove('hidden');
+                btnBackOrganiser.classList.add('flex');
+
+                renderFinishedView();
+            }
+        }
+
+        // --- ORGANISER VIEW LOGIC ---
+        function renderOrganiserView() {
+            const grid = document.getElementById('participants-grid');
+            grid.innerHTML = '';
+
+            document.getElementById('count-participants').innerText = state.participants.length;
+            document.getElementById('launch-btn-label').innerText =
+                `Valider les ${state.participants.length} participants & Lancer le tirage`;
+
+            state.participants.forEach((name, idx) => {
+                const item = document.createElement('div');
+                item.className = "flex items-center space-x-2 bg-festive-cream dark:bg-slate-800/80 border border-amber-200/80 dark:border-slate-700 rounded-2xl px-3.5 py-2.5 focus-within:border-rose-700 focus-within:ring-2 focus-within:ring-rose-700/15 transition";
+                item.innerHTML = `
+                    <span class="w-6 h-6 rounded-lg bg-rose-900/10 dark:bg-rose-500/20 text-rose-900 dark:text-rose-300 text-xs font-extrabold flex items-center justify-center shrink-0">${idx + 1}</span>
+                    <input type="text" value="${escapeHtml(name)}" placeholder="Prénom..."
+                        onchange="renameParticipant(${idx}, this.value)"
+                        class="w-full bg-transparent text-sm font-semibold text-slate-900 dark:text-white focus:outline-none">
+                    ${state.participants.length > 3 ? `
+                        <button type="button" onclick="removeParticipant(${idx})" aria-label="Supprimer ce participant" class="text-slate-400 hover:text-rose-700 dark:hover:text-rose-400 p-1 transition">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    ` : ''}
+                `;
+                grid.appendChild(item);
+            });
+
+            // Sync exclusions panel
+            const panel = document.getElementById('exclusions-panel');
+            const chevron = document.getElementById('exclusions-chevron');
+            if (state.exclusionsOpen) {
+                panel.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+            } else {
+                panel.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+            }
+
+            renderExclusionsControls();
+        }
+
+        function prefillNineParticipants() {
+            state.participants = [...DEFAULT_NINE];
+            state.mutualExclusions = [...DEFAULT_EXCLUSIONS];
+            saveState();
+            renderApp();
+            showToast("Participants et exclusions réinitialisés avec la liste initiale !");
+        }
+
+        function addParticipant() {
+            state.participants.push(`Participant ${state.participants.length + 1}`);
+            saveState();
+            renderApp();
+        }
+
+        function removeParticipant(idx) {
+            if (state.participants.length <= 3) {
+                showToast("Il faut au minimum 3 participants.");
+                return;
+            }
+            const removed = state.participants[idx];
+            state.participants.splice(idx, 1);
+            state.mutualExclusions = state.mutualExclusions.filter(pair => !pair.includes(removed));
+            saveState();
+            renderApp();
+        }
+
+        function renameParticipant(idx, rawValue) {
+            const oldName = state.participants[idx];
+            const clean = rawValue.trim() || `Participant ${idx + 1}`;
+            state.participants[idx] = clean;
+
+            state.mutualExclusions = state.mutualExclusions.map(pair => [
+                pair[0] === oldName ? clean : pair[0],
+                pair[1] === oldName ? clean : pair[1]
+            ]);
+
+            saveState();
+            renderApp();
+        }
+
+        function toggleExclusionsPanel() {
+            state.exclusionsOpen = !state.exclusionsOpen;
+            saveState();
+            renderOrganiserView();
+        }
+
+        function renderExclusionsControls() {
+            const selectA = document.getElementById('exclusion-person-a');
+            const selectB = document.getElementById('exclusion-person-b');
+            const list = document.getElementById('exclusions-list');
+            const badge = document.getElementById('exclusions-badge');
+
+            const optionsHtml = state.participants
+                .map((p, i) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`)
+                .join('');
+
+            selectA.innerHTML = optionsHtml;
+            selectB.innerHTML = optionsHtml;
+            if (state.participants.length > 1) {
+                selectB.selectedIndex = 1;
+            }
+
+            if (state.mutualExclusions.length > 0) {
+                badge.innerText = state.mutualExclusions.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            list.innerHTML = '';
+            if (state.mutualExclusions.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-2">Aucune exclusion ajoutée.</p>`;
+                return;
+            }
+
+            state.mutualExclusions.forEach((pair, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-semibold";
+                row.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="text-rose-800 dark:text-rose-300">${escapeHtml(pair[0])}</span>
+                        <span class="text-slate-400">↔ ne tire pas ↔</span>
+                        <span class="text-rose-800 dark:text-rose-300">${escapeHtml(pair[1])}</span>
+                    </div>
+                    <button type="button" onclick="removeMutualExclusion(${idx})" aria-label="Supprimer l'exclusion" class="text-slate-400 hover:text-rose-600 p-1 transition">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function addMutualExclusion() {
+            const a = document.getElementById('exclusion-person-a').value;
+            const b = document.getElementById('exclusion-person-b').value;
+
+            if (!a || !b || a === b) {
+                showToast("Sélectionnez deux personnes différentes.");
+                return;
+            }
+
+            const alreadyExists = state.mutualExclusions.some(
+                pair => (pair[0] === a && pair[1] === b) || (pair[0] === b && pair[1] === a)
+            );
+
+            if (alreadyExists) {
+                showToast("Cette paire est déjà exclue.");
+                return;
+            }
+
+            state.mutualExclusions.push([a, b]);
+            saveState();
+            renderExclusionsControls();
+        }
+
+        function removeMutualExclusion(idx) {
+            state.mutualExclusions.splice(idx, 1);
+            saveState();
+            renderExclusionsControls();
+        }
+
+        // --- DERANGEMENT / BACKTRACKING SOLVER ---
+        function computeValidSecretSantaDraw(names, mutualPairs) {
+            const n = names.length;
+            const allowedRecipients = {};
+
+            names.forEach(giver => {
+                const candidates = names.filter(receiver => {
+                    if (receiver === giver) return false;
+                    const excluded = mutualPairs.some(
+                        pair => (pair[0] === giver && pair[1] === receiver) || (pair[1] === giver && pair[0] === receiver)
+                    );
+                    return !excluded;
+                });
+                // Fisher-Yates shuffle for uniform randomness
+                for (let i = candidates.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+                }
+                allowedRecipients[giver] = candidates;
+            });
+
+            // Heuristic: order givers by fewest valid targets first (MRV)
+            const orderedGivers = [...names].sort(
+                (a, b) => allowedRecipients[a].length - allowedRecipients[b].length
+            );
+
+            const drawMap = {};
+            const usedRecipients = new Set();
+
+            function backtrack(step) {
+                if (step === n) return true;
+                const currentGiver = orderedGivers[step];
+
+                for (const candidate of allowedRecipients[currentGiver]) {
+                    if (!usedRecipients.has(candidate)) {
+                        usedRecipients.add(candidate);
+                        drawMap[currentGiver] = candidate;
+                        if (backtrack(step + 1)) return true;
+                        usedRecipients.delete(candidate);
+                        delete drawMap[currentGiver];
+                    }
+                }
+                return false;
+            }
+
+            return backtrack(0) ? drawMap : null;
+        }
+
+        function validateAndStartDraw() {
+            const cleaned = state.participants.map(p => p.trim()).filter(Boolean);
+            if (cleaned.length < 3) {
+                showToast("Veuillez entrer au moins 3 participants.");
+                return;
+            }
+            if (new Set(cleaned).size !== cleaned.length) {
+                showToast("Deux participants portent exactement le même prénom. Ajoutez une initiale pour les différencier.");
+                return;
+            }
+
+            const solution = computeValidSecretSantaDraw(cleaned, state.mutualExclusions);
+            if (!solution) {
+                showToast("Impossible de réaliser un tirage avec trop d'exclusions. Supprimez une règle.");
+                return;
+            }
+
+            state.participants = cleaned;
+            state.assignments = solution;
+            state.drawnGivers = [];
+            state.mode = 'participants';
+
+            saveState();
+            renderApp();
+        }
+
+        // --- PARTICIPANTS VIEW LOGIC ---
+        function renderParticipantsView() {
+            const total = state.participants.length;
+            const doneCount = state.drawnGivers.length;
+
+            document.getElementById('header-progress-text').innerText =
+                `${doneCount} / ${total} tirage${doneCount > 1 ? 's' : ''} effectué${doneCount > 1 ? 's' : ''}`;
+
+            const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+            document.getElementById('participants-progress-bar').style.width = `${pct}%`;
+
+            const grid = document.getElementById('participant-cards-grid');
+            grid.innerHTML = '';
+
+            state.participants.forEach(person => {
+                const isDone = state.drawnGivers.includes(person);
+                const card = document.createElement('button');
+                card.type = 'button';
+
+                if (isDone) {
+                    card.disabled = true;
+                    card.className = "group relative flex flex-col items-center justify-center p-6 rounded-3xl bg-slate-100/80 dark:bg-slate-900/50 border-2 border-slate-200/80 dark:border-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed select-none transition";
+                    card.innerHTML = `
+                        <div class="w-12 h-12 rounded-2xl bg-slate-200/70 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center font-festive text-xl font-bold mb-3">
+                            ${escapeHtml(person.charAt(0).toUpperCase())}
+                        </div>
+                        <span class="font-festive text-xl font-bold line-through decoration-slate-300 dark:decoration-slate-700">${escapeHtml(person)}</span>
+                        <span class="mt-2 inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-emerald-900/10 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 text-xs font-bold">
+                            <span>Déjà tiré ✓</span>
+                        </span>
+                    `;
+                } else {
+                    card.onclick = () => openParticipantConfirmation(person);
+                    card.className = "group relative flex flex-col items-center justify-center p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-amber-200/90 dark:border-slate-700 hover:border-rose-700 dark:hover:border-amber-400 shadow-sm hover:shadow-xl hover:shadow-rose-900/10 transition-all duration-200 transform hover:-translate-y-1 active:scale-[0.98] cursor-pointer";
+                    card.innerHTML = `
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-900 to-rose-700 group-hover:from-amber-600 group-hover:to-amber-500 text-amber-50 flex items-center justify-center font-festive text-xl font-bold mb-3 shadow-sm transition-colors">
+                            ${escapeHtml(person.charAt(0).toUpperCase())}
+                        </div>
+                        <span class="font-festive text-xl sm:text-2xl font-extrabold text-rose-950 dark:text-white group-hover:text-rose-800 dark:group-hover:text-amber-200 transition-colors">
+                            ${escapeHtml(person)}
+                        </span>
+                        <span class="mt-2 text-xs font-semibold text-amber-800/80 dark:text-amber-300/80 group-hover:text-rose-700 dark:group-hover:text-amber-300 transition-colors">
+                            Clique sur ton prénom →
+                        </span>
+                    `;
+                }
+
+                grid.appendChild(card);
+            });
+        }
+
+        // --- MODAL: STEP A & STEP B ---
+        function openParticipantConfirmation(personName) {
+            if (state.drawnGivers.includes(personName)) return;
+            activeParticipant = personName;
+
+            document.getElementById('modal-selected-name').innerText = personName;
+            document.getElementById('modal-step-confirm').classList.remove('hidden');
+            document.getElementById('modal-step-result').classList.add('hidden');
+
+            const overlay = document.getElementById('reveal-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+
+        function closeRevealOverlayWithoutSaving() {
+            activeParticipant = null;
+            const overlay = document.getElementById('reveal-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
+
+        function revealRecipientNow() {
+            if (!activeParticipant || !state.assignments[activeParticipant]) return;
+
+            const recipient = state.assignments[activeParticipant];
+            document.getElementById('modal-result-giver').innerText = activeParticipant;
+            document.getElementById('modal-result-recipient').innerText = recipient;
+
+            document.getElementById('modal-step-confirm').classList.add('hidden');
+            document.getElementById('modal-step-result').classList.remove('hidden');
+
+            launchFestiveConfetti();
+        }
+
+        function confirmAndLockParticipant() {
+            if (activeParticipant && !state.drawnGivers.includes(activeParticipant)) {
+                state.drawnGivers.push(activeParticipant);
+            }
+
+            // Clear sensitive DOM text immediately
+            document.getElementById('modal-result-recipient').innerText = '';
+            activeParticipant = null;
+
+            const overlay = document.getElementById('reveal-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+
+            if (state.drawnGivers.length >= state.participants.length) {
+                state.mode = 'finished';
+                saveState();
+                renderApp();
+                launchFestiveConfetti();
+            } else {
+                saveState();
+                renderParticipantsView();
+            }
+        }
+
+        // --- FINISHED VIEW LOGIC ---
+        function renderFinishedView() {
+            const total = state.participants.length;
+            document.getElementById('finished-count-badge').innerText = `Terminé`;
+
+            const pillsContainer = document.getElementById('finished-pills');
+            pillsContainer.innerHTML = '';
+
+            state.participants.forEach(person => {
+                const pill = document.createElement('span');
+                pill.className = "inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-100/70 dark:bg-slate-800 text-amber-950 dark:text-amber-200 text-xs font-bold";
+                pill.innerHTML = `
+                    <span class="text-emerald-700 dark:text-emerald-400">✓</span>
+                    <span>${escapeHtml(person)}</span>
+                `;
+                pillsContainer.appendChild(pill);
+            });
+
+            hideOrganiserRecap();
+        }
+
+        function confirmOrganiserRecap() {
+            openSecurityModal(
+                "Accès Organisateur",
+                "Voulez-vous afficher la liste complète des attributions ? Assurez-vous qu'aucun participant ne regarde l'écran.",
+                "Afficher le récapitulatif",
+                () => {
+                    const list = document.getElementById('organiser-recap-list');
+                    list.innerHTML = '';
+
+                    state.participants.forEach(giver => {
+                        const row = document.createElement('div');
+                        row.className = "py-2.5 flex items-center justify-between gap-2";
+                        row.innerHTML = `
+                            <span class="font-bold text-slate-900 dark:text-white">${escapeHtml(giver)}</span>
+                            <span class="text-xs text-slate-400">offre à →</span>
+                            <span class="font-extrabold text-emerald-800 dark:text-emerald-400">${escapeHtml(state.assignments[giver] || '')}</span>
+                        `;
+                        list.appendChild(row);
+                    });
+
+                    document.getElementById('btn-show-recap').classList.add('hidden');
+                    document.getElementById('organiser-recap-box').classList.remove('hidden');
+                }
+            );
+        }
+
+        function hideOrganiserRecap() {
+            document.getElementById('organiser-recap-box').classList.add('hidden');
+            document.getElementById('organiser-recap-list').innerHTML = '';
+            document.getElementById('btn-show-recap').classList.remove('hidden');
+        }
+
+        // --- SECURITY MODALS & NAVIGATION ---
+        function confirmReturnToOrganiser() {
+            openSecurityModal(
+                "Retourner en Mode Organisateur ?",
+                "Attention : revenir à la configuration annulera le tirage en cours afin de préserver la confidentialité.",
+                "Retourner à la config",
+                () => {
+                    state.mode = 'organiser';
+                    state.assignments = {};
+                    state.drawnGivers = [];
+                    saveState();
+                    renderApp();
+                }
+            );
+        }
+
+        function confirmNewDraw() {
+            openSecurityModal(
+                "Démarrer un nouveau tirage ?",
+                "Les résultats actuels seront effacés et vous reviendrez à l'écran de configuration.",
+                "Nouveau tirage",
+                () => {
+                    state.mode = 'organiser';
+                    state.assignments = {};
+                    state.drawnGivers = [];
+                    saveState();
+                    renderApp();
+                    showToast("Prêt pour un nouveau tirage !");
+                }
+            );
+        }
+
+        function openSecurityModal(title, description, confirmLabel, onConfirm) {
+            document.getElementById('sec-modal-title').innerText = title;
+            document.getElementById('sec-modal-desc').innerText = description;
+            const confirmBtn = document.getElementById('sec-modal-confirm');
+            confirmBtn.innerText = confirmLabel;
+
+            confirmBtn.onclick = () => {
+                closeSecurityModal();
+                onConfirm();
+            };
+
+            const modal = document.getElementById('security-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeSecurityModal() {
+            const modal = document.getElementById('security-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // --- UTILITIES ---
+        function launchFestiveConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 75,
+                    spread: 65,
+                    origin: { y: 0.65 },
+                    colors: ['#881337', '#BE123C', '#064E3B', '#D97706', '#FDE68A']
+                });
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.innerText = str;
+            return div.innerHTML;
+        }
+
+        let toastTimer = null;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = msg;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3400);
+        }
+    </script>
 </body>
 </html>
